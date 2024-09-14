@@ -1,0 +1,145 @@
+/*
+#include <mega128a.h>
+#include <delay.h>
+
+void main(void)
+{
+
+  int i = 0;
+  unsigned char key;
+
+  DDRA = 0xff;     // 1111 1111
+  PORTA = 0Xff;
+  DDRB = 0xff;
+  PORTB = 0Xff;
+  DDRD = 0Xfc;      // 2개만 입력 모드
+  PORTD = 0Xff;
+  // init;  // 2번 왔다 갔다
+  PORTA = PORTB = 0x55;     //  55 : 0101 0101          양쪽이 번갈아 가면서 깜빡깜빡 쉬프트
+  delay_ms(200);
+  PORTA = PORTB = 0xaa;     //  aa : 1010 1010
+  delay_ms(200);
+  PORTA = PORTB = 0x55;     // 0101 0101
+  PORTA = PORTB = 0x55;     //  55 : 0101          양쪽이 번갈아 가면서 깜빡깜빡 쉬프트
+  delay_ms(100);
+  PORTA = PORTB = 0xaa;     //  aa : 1010
+  delay_ms(200);
+  PORTA = PORTB = 0x55;     // 0101 0101
+
+
+while (1)
+      {
+       key = (PIND);   // 0xff & 0x03조건은              1111 1111 & 0000 0011  => 0000 0011
+        switch(key) // 0000 0011
+        {
+            case 0xff: PORTA = PORTB = 0xff; break;    // 다 꺼진 상태
+            case 0xfe: PORTA = 0x00;  break;        // 포트 A 다 켜짐
+            case 0xfd: PORTB = 0x00;  break;        // 포트 B 다 켜짐
+            case 0xfc: PORTA = PORTB = 0x00; break;  // 포트 A, B 둘 다 켜짐
+            default:   PORTA = PORTB = 0x55;        // 디폴트 교차 해서 켜짐 이건 안 들어와야됨   0101 0101
+        }
+        delay_ms(100);      // 바로 바로 동작이 안 됨, 0.3초 유지 , 1초로 늘려 볼 것
+      }
+} */
+
+#include <mega128a.h>
+#include <delay.h>
+
+void main(void)
+{
+
+  int i = 0;
+  unsigned char key;
+  unsigned char ledA;
+  unsigned char ledB;
+
+  DDRA = 0xff;     // 1111 1111
+  PORTA = 0Xff;
+  DDRB = 0xff;
+  PORTB = 0Xff;
+  DDRD = 0Xfc;      // 2개만 입력 모드
+  PORTD = 0Xff;
+
+  // init;  // 2번 왔다 갔다
+  PORTA = PORTB = 0x55;     //  55 : 0101 0101          양쪽이 번갈아 가면서 깜빡깜빡 쉬프트
+  delay_ms(200);
+  PORTA = PORTB = 0xaa;     //  aa : 1010 1010
+  delay_ms(200);
+  PORTA = PORTB = 0x55;     // 0101 0101
+
+  PORTA = PORTB = 0x55;     //  55 : 0101          양쪽이 번갈아 가면서 깜빡깜빡 쉬프트
+  delay_ms(200);
+  PORTA = PORTB = 0xaa;     //  aa : 1010
+  delay_ms(200);
+  PORTA = PORTB = 0x55;     // 0101 0101
+
+
+while (1)
+      {
+        key = (PIND& 0xff);   // 1111 1111 & 1111 1111
+        switch(key)
+        {
+          case 0xfe:    // 1111 1110     A 가는거
+            {
+                ledA = 0xfe;      // 1111 1110
+                for(i = 0; i < 8; i++)
+                {
+                    PORTA = ledA;
+                    ledA = (ledA << 1) | 0x01;   // 0000 0001
+                    delay_ms(100);
+                }
+                break;
+            }
+
+            case 0xfd:   // 1111 1101   B 오는거
+            {
+                ledB = 0x7f;       // 0111 1111
+                for(i = 0; i < 8; i++)
+                {
+                    PORTB = ledB;
+                    ledB = (ledB >> 1) | 0x80;   // 1000 0000
+                    delay_ms(100);
+                }
+                break;
+            }
+
+            case 0xfc:    // 1111 1100 :  A, B 둘 다 눌렀을 때 양쪽에서 오는 거
+            {
+                ledA = 0xfe; // 1111 1110
+                ledB = 0x7f; // 0111 1111
+                for(i = 0; i < 8; i++)
+                {
+                    PORTA = ledA;
+                    PORTB = ledB;
+                    ledA = (ledA << 1) | 0x01;     // 0000 0001
+                    ledB = (ledB >> 1) | 0x80;     // 1000 0000
+                    delay_ms(100);
+                }
+
+                ledA = 0xbf; // 0111 1111   1011 1111
+                ledB = 0xfd; // 1111 1110   1111 1101
+                for(i = 0; i < 8; i++)
+                {
+                    PORTA = ledA;
+                    PORTB = ledB;
+                    ledA = (ledA >> 1) | 0x80;
+                    ledB = (ledB << 1) | 0x01;
+                    delay_ms(100);
+                }
+                break;
+            }
+
+            case 0xff:    // ff : 1111 1111 NULL(아무것도 안 누른 상태) : 0101 0101 1010 1010 왔다 갔다
+            {
+              PORTA = PORTB = 0x55;
+              delay_ms(200);
+              PORTA = PORTB = 0xaa;
+              delay_ms(200);
+            }
+
+            default:   PORTA = PORTB = 0x55;        // 디폴트 교차 해서 켜짐 이건 안 들어와야됨   0101 0101
+        }
+        delay_ms(100);      // 바로 바로 동작이 안 됨, 0.3초 유지 , 1초로 늘려 볼 것
+      }
+}
+        // asm : 인터럭트를 지금부터 시작해라

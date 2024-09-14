@@ -1,0 +1,13 @@
+VERSION:3 SOURCE_TIMESTAMP:582F4888
+NODE:M LEVEL:0 LINE:70 "F_CPU"
+NODE:I LEVEL:0 LINE:71 "C:\cvavreval\inc\mega128a.h"
+NODE:I LEVEL:0 LINE:72 "C:\cvavreval\inc\stdio.h"
+NODE:I LEVEL:0 LINE:73 "C:\cvavreval\inc\delay.h"
+NODE:V LEVEL:0 LINE:75 "i -> R4,R5"
+NODE:V LEVEL:0 LINE:76 "step_data -> RAM:????"
+NODE:V LEVEL:0 LINE:77 "step_index -> R6,R7"
+NODE:F LEVEL:0 LINE:82 "ext_int0_isr(void)"
+NODE:F LEVEL:0 LINE:93 "ext_int1_isr(void)"
+NODE:F LEVEL:0 LINE:104 "step_forward(void)"
+NODE:F LEVEL:0 LINE:112 "step_backward(void)"
+NODE:F LEVEL:0 LINE:120 "main(void)"
